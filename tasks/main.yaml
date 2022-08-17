@@ -5,9 +5,11 @@
 
 - include_tasks: postgres.yaml
   when: pg_enabled
+  tags: postgres
 
 - include_tasks: gitea.yaml
   when: gitea_enabled
+  tags: gitea
 
 #- include_tasks: passbolt.yaml
 #  when: passbolt_enabled

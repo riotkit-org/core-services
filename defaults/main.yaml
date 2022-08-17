@@ -5,21 +5,39 @@ network_subnet: "172.131.2.0/24"
 network_gateway: "172.131.2.1"
 network_ip_range: "172.131.2.128/25"
 
-recreate: false # should the containers be recreated on deployment?
+recreate: true # should the containers be recreated on deployment?
 
 # ------
 # Gitea
 # ------
 ssh_port: 2222
 gitea_enabled: true
+gitea_ip: "172.131.2.211"
 gitea_image: "gitea/gitea:1.17.0-rootless"
-gitea_postgres_host: "postgres"  # if PostgreSQL is in other network, then you need to type a DNS name or IP address there
+gitea_postgres_host: "{{ pg_ip }}"  # if PostgreSQL is in other network, then you need to type a DNS name or IP address there
 gitea_postgres_port: "5432"
 gitea_postgres_db_name: "gitea"
 gitea_postgres_user: "gitea"
 gitea_postgres_password: "gitea"
 gitea_memory_requests: "100m"
 gitea_memory_limit: "512m"
+gitea_conf_ssh_domain: example.org
+gitea_root_url: "https://example.org"
+gitea_forward_port_to_ip: "127.0.0.1"  # change to eg. VPN ip address
+
+# settings
+gitea_conf_app_name: "GIT | A cup of revolution - we have to take the power back to the grassroots"
+gitea_conf_install_lock: "false"
+gitea_conf_disable_registration: "true"
+gitea_conf_register_email_confirm: "true"
+gitea_conf_default_user_visibility: "private"
+gitea_conf_default_org_visibility: "private"
+gitea_conf_org_member_visible: "false"
+gitea_conf_enable_heat_map: "false"
+gitea_conf_enable_timetracking: "false"
+gitea_conf_default_enable_timetracking: "false"
+gitea_conf_email_domain_whitelist: "riseup.net,protonmail.eu,protonmail.com,squat.net,shelter.is,free.de,indivia.net,aktivix.org,espiv.net"
+gitea_conf_webhook_allowed_hosts: "10.0.0.0/8"
 
 
 # -----------

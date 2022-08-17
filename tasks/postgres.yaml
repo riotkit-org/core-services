@@ -61,6 +61,7 @@
       expose:
           - "5432"
       generate_systemd:
+          path: /etc/systemd/system
           restart_policy: always
           time: 120
           names: true
@@ -103,3 +104,8 @@
   with_items:
       - {"db": "{{ gitea_postgres_db_name }}", "name": "{{ gitea_postgres_user }}", 'password': "{{ gitea_postgres_password }}"}
       - {"db": "{{ passbolt_postgres_db_name }}", "name": "{{ passbolt_postgres_user }}", "password": "{{ passbolt_postgres_password }}"}
+
+- name: Enable on system startup
+  systemd:
+      name: core-postgres
+      enabled: true

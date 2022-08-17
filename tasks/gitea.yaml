@@ -1,13 +1,58 @@
+- name: Make sure directories exists
+  tags: gitea
+  file:
+      path: "{{ item.path }}"
+      owner: "{{ item.owner }}"
+      group: "{{ item.group }}"
+      mode: "{{ item.access }}"
+      state: directory
+  with_items:
+      - {path: "/var/lib/riotkit-core/var/lib/gitea", owner: "1000", group: "1000", access: "u+rwx,g,o"}
+      - {path: "/var/lib/riotkit-core/etc/gitea", owner: "1000", group: "1000", access: "u+rwx,g,o"}
+
+###+ SECRET_KEY +###
+- name: Check if gitea_secret_key already exists
+  tags: gitea
+  register: gitea_secret_key_exists
+  stat:
+      path: /var/lib/riotkit-core/var/lib/gitea/gitea_secret_key
+
+- name: Generate new gitea_secret_key if it does not exist
+  tags: gitea
+  when: not gitea_secret_key_exists.stat.exists
+  shell: "openssl rand -base64 32 > /var/lib/riotkit-core/var/lib/gitea/gitea_secret_key"
+
+- name: Read gitea_secret_key
+  tags: gitea
+  shell: "cat /var/lib/riotkit-core/var/lib/gitea/gitea_secret_key"
+  register: gitea_secret_key_read
+
+- tags: gitea
+  set_fact:
+      gitea_secret_key: "{{ gitea_secret_key_read.stdout }}"
+###+ end of SECRET_KEY +###
+
+- name: Render configuration file - app.ini
+  tags: gitea
+  template:
+      src: gitea/app.ini.j2
+      dest: /var/lib/riotkit-core/etc/gitea/app.ini
+      owner: "1000"
+      group: "1000"
+      mode: "u+rw,g+rw,o"
+
 - name: Create Gitea container
+  tags: gitea
   containers.podman.podman_container:
       name: gitea
       image: "{{ gitea_image }}"
-      state: present
+      state: started
       recreate: "{{ recreate }}"
       network: "{{ network_name }}"
       memory_reservation: "{{ gitea_memory_requests }}"
       memory: "{{ gitea_memory_limit }}"
       log_driver: "journald"
+      ip: "{{ gitea_ip }}"
       volume:
           - /var/lib/riotkit-core/var/lib/gitea:/var/lib/gitea
           - /var/lib/riotkit-core/etc/gitea:/etc/gitea
@@ -15,9 +60,12 @@
           - /etc/localtime:/etc/localtime:ro
       expose:
           - "{{ ssh_port }}"
-          - "80"
-          - "443"
+          - "3000"
+      ports:
+          - "{{ gitea_forward_port_to_ip }}:3000:3000/tcp"
+          - "{{ gitea_forward_port_to_ip }}:{{ ssh_port }}:{{ ssh_port }}/tcp"
       generate_systemd:
+          path: /etc/systemd/system
           restart_policy: always
           time: 120
           names: true
@@ -28,3 +76,9 @@
           GITEA__database__NAME: "{{ gitea_postgres_db_name }}"
           GITEA__database__USER: "{{ gitea_postgres_user }}"
           GITEA__database__PASSWD: "{{ gitea_postgres_password }}"
+
+- name: Enable on system startup
+  tags: gitea
+  systemd:
+      name: core-gitea
+      enabled: true

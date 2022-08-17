@@ -1,0 +1,71 @@
+APP_NAME = {{ gitea_conf_app_name }}
+RUN_USER = git
+RUN_MODE = prod
+
+[repository]
+ROOT = /var/lib/gitea/git/repositories
+
+[repository.local]
+LOCAL_COPY_PATH = /tmp/gitea/local-repo
+
+[repository.upload]
+TEMP_PATH = /tmp/gitea/uploads
+
+[server]
+PROTOCOL = http
+APP_DATA_PATH           = /var/lib/gitea
+SSH_DOMAIN              = {{ gitea_conf_ssh_domain }}
+HTTP_PORT               = 3000
+ROOT_URL                = {{ gitea_root_url }}
+DISABLE_SSH             = false
+; In rootless gitea container only internal ssh server is supported
+START_SSH_SERVER        = true
+SSH_PORT                = {{ ssh_port }}
+SSH_LISTEN_PORT         = {{ ssh_port }}
+BUILTIN_SSH_SERVER_USER = git
+LFS_START_SERVER        =
+
+[database]
+PATH    = /var/lib/gitea/data/gitea.db
+DB_TYPE = postgres
+HOST    = {{ gitea_postgres_host }}:{{ gitea_postgres_port }}
+NAME    = {{ gitea_postgres_db_name }}
+USER    = {{ gitea_postgres_user }}
+PASSWD  = {{ gitea_postgres_password }}
+
+[session]
+PROVIDER_CONFIG = /var/lib/gitea/data/sessions
+
+[picture]
+AVATAR_UPLOAD_PATH            = /var/lib/gitea/data/avatars
+REPOSITORY_AVATAR_UPLOAD_PATH = /var/lib/gitea/data/gitea/repo-avatars
+
+[attachment]
+PATH = /var/lib/gitea/data/attachments
+
+[log]
+ROOT_PATH = /var/lib/gitea/data/log
+
+[security]
+INSTALL_LOCK                  = {{ gitea_conf_install_lock }}
+SECRET_KEY                    = {{ gitea_secret_key }}
+REVERSE_PROXY_LIMIT           = 1
+REVERSE_PROXY_TRUSTED_PROXIES = *
+
+[service]
+DISABLE_REGISTRATION = {{ gitea_conf_disable_registration }}
+REGISTER_EMAIL_CONFIRM = {{ gitea_conf_register_email_confirm }}
+REQUIRE_SIGNIN_VIEW  = true
+DEFAULT_USER_VISIBILITY = {{ gitea_conf_default_user_visibility }}
+DEFAULT_ORG_VISIBILITY = {{ gitea_conf_default_org_visibility }}
+DEFAULT_ORG_MEMBER_VISIBLE = {{ gitea_conf_org_member_visible }}
+ENABLE_USER_HEATMAP = {{ gitea_conf_enable_heat_map }}
+ENABLE_TIMETRACKING = {{ gitea_conf_enable_timetracking }}
+DEFAULT_ENABLE_TIMETRACKING = {{ gitea_conf_default_enable_timetracking }}
+EMAIL_DOMAIN_WHITELIST = {{ gitea_conf_email_domain_whitelist }}
+
+[lfs]
+PATH = /var/lib/gitea/git/lfs
+
+[webhook]
+ALLOWED_HOST_LIST = "{{ gitea_conf_webhook_allowed_hosts }}"

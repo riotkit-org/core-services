@@ -42,4 +42,4 @@ passbolt_enabled: true
 passbolt_postgres_db_name: "passbolt"
 passbolt_postgres_user: "passbolt"
 passbolt_postgres_password: "alerta-antifascista"
-passbolt_postgres_host: "postgres"
+passbolt_postgres_host: "{{ pg_ip }}"

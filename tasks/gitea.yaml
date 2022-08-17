@@ -1,0 +1,30 @@
+- name: Create Gitea container
+  containers.podman.podman_container:
+      name: gitea
+      image: "{{ gitea_image }}"
+      state: present
+      recreate: "{{ recreate }}"
+      network: "{{ network_name }}"
+      memory_reservation: "{{ gitea_memory_requests }}"
+      memory: "{{ gitea_memory_limit }}"
+      log_driver: "journald"
+      volume:
+          - /var/lib/riotkit-core/var/lib/gitea:/var/lib/gitea
+          - /var/lib/riotkit-core/etc/gitea:/etc/gitea
+          - /etc/timezone:/etc/timezone:ro
+          - /etc/localtime:/etc/localtime:ro
+      expose:
+          - "{{ ssh_port }}"
+          - "80"
+          - "443"
+      generate_systemd:
+          restart_policy: always
+          time: 120
+          names: true
+          container_prefix: core
+      env:
+          GITEA__database__DB_TYPE: postgres
+          GITEA__database__HOST: "{{ gitea_postgres_host }}:{{ gitea_postgres_port }}"
+          GITEA__database__NAME: "{{ gitea_postgres_db_name }}"
+          GITEA__database__USER: "{{ gitea_postgres_user }}"
+          GITEA__database__PASSWD: "{{ gitea_postgres_password }}"

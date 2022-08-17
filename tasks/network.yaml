@@ -1,0 +1,6 @@
+- name: Create a podman network
+  containers.podman.podman_network:
+      name: "{{ network_name }}"
+      ip_range: "{{ network_ip_range }}"
+      subnet: "{{ network_subnet }}"
+      gateway: "{{ network_gateway }}"

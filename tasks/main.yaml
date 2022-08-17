@@ -1,0 +1,13 @@
+- include_tasks: podman.yaml
+  when: install_podman
+
+- include_tasks: network.yaml
+
+- include_tasks: postgres.yaml
+  when: pg_enabled
+
+- include_tasks: gitea.yaml
+  when: gitea_enabled
+
+#- include_tasks: passbolt.yaml
+#  when: passbolt_enabled

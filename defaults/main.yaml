@@ -1,0 +1,45 @@
+install_podman: true
+
+network_name: "coresrv"
+network_subnet: "172.131.2.0/24"
+network_gateway: "172.131.2.1"
+network_ip_range: "172.131.2.128/25"
+
+recreate: false # should the containers be recreated on deployment?
+
+# ------
+# Gitea
+# ------
+ssh_port: 2222
+gitea_enabled: true
+gitea_image: "gitea/gitea:1.17.0-rootless"
+gitea_postgres_host: "postgres"  # if PostgreSQL is in other network, then you need to type a DNS name or IP address there
+gitea_postgres_port: "5432"
+gitea_postgres_db_name: "gitea"
+gitea_postgres_user: "gitea"
+gitea_postgres_password: "gitea"
+gitea_memory_requests: "100m"
+gitea_memory_limit: "512m"
+
+
+# -----------
+# PostgreSQL
+# -----------
+pg_enabled: true
+pg_backup_before_deploy: true
+pg_image: "postgres:14.5-alpine"
+pg_memory_requests: "128M"
+pg_memory: "512M"
+pg_admin_user: "anticapitalist"
+pg_admin_password: "read-about-anarchist-syndicalism"
+pg_ip: "172.131.2.210"
+
+
+# ---------
+# Passbolt
+# ---------
+passbolt_enabled: true
+passbolt_postgres_db_name: "passbolt"
+passbolt_postgres_user: "passbolt"
+passbolt_postgres_password: "alerta-antifascista"
+passbolt_postgres_host: "postgres"

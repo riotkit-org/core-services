@@ -1,0 +1,13 @@
+- name: Add Kubic GPG key
+  ansible.builtin.get_url:
+      url: "https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/xUbuntu_{{ ansible_distribution_version }}/Release.key"
+      dest: /etc/apt/trusted.gpg.d/kubic.asc
+
+- name: Add Kubic APT repository
+  ansible.builtin.apt_repository:
+      repo: "deb http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_{{ ansible_distribution_version }}/ /"
+
+- name: Install Podman
+  apt:
+      update_cache: true
+      name: podman

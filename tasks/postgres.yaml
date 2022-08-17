@@ -1,0 +1,103 @@
+- name: Prepare
+  pip:
+      name: psycopg2-binary
+      state: present
+
+- name: Check if container exists
+  containers.podman.podman_container_info:
+      name: postgres
+  register: postgres_info
+
+- name: Make sure directories exists
+  file:
+      path: "{{ item.path }}"
+      owner: "{{ item.owner }}"
+      group: "{{ item.group }}"
+      mode: "{{ item.access }}"
+      state: directory
+  with_items:
+      - {path: "/var/backup/postgres", owner: "root", group: "root", access: "u+rwx,g,o"}
+      - {path: "/var/lib/riotkit-core/var/lib/postgres", owner: "70", group: "70", access: "u+rwx,g,o"}
+      - {path: "/var/lib/riotkit-core/run/secrets", owner: "70", group: "70", access: "u+rwx,g,o"}
+
+- name: Create a backup if the database is already set up
+  when: postgres_info.containers | length > 0 and pg_backup_before_deploy
+  ignore_errors: true
+  community.postgresql.postgresql_db:
+      name: "{{ item }}"
+      state: dump
+      target: "/var/backup/postgres/{{ ansible_date_time.iso8601_basic_short }}-{{ item }}.sql.gz"
+      login_user: "{{ pg_admin_user }}"
+      login_password: "{{ pg_admin_password }}"
+      login_host: "{{ pg_ip }}"
+  with_items:
+      - "{{ gitea_postgres_db_name }}"
+      - "{{ passbolt_postgres_db_name }}"
+
+- name: Populate password env file
+  template:
+      src: postgres-password.j2
+      dest: /var/lib/riotkit-core/run/secrets/postgres-passwd
+      mode: "u+rx,g,o"
+      owner: "70"
+      group: "70"
+
+- name: Create PostgreSQL container
+  containers.podman.podman_container:
+      name: postgres
+      image: "{{ pg_image }}"
+      state: started
+      network: "{{ network_name }}"
+      ip: "{{ pg_ip }}"
+      recreate: "{{ recreate }}"
+      memory_reservation: "{{ pg_memory_requests }}"
+      memory: "{{ pg_memory }}"
+      log_driver: "journald"
+      volume:
+          - /var/lib/riotkit-core/var/lib/postgres:/var/lib/postgresql
+          - /var/lib/riotkit-core/run/secrets/postgres-passwd:/run/secrets/postgres-passwd:ro
+      expose:
+          - "5432"
+      generate_systemd:
+          restart_policy: always
+          time: 120
+          names: true
+          container_prefix: core
+      env:
+          POSTGRES_USER: "{{ pg_admin_user }}"
+          POSTGRES_PASSWORD_FILE: "/run/secrets/postgres-passwd"
+
+- name: Wait for database to get up
+  community.postgresql.postgresql_ping:
+      db: "postgres"
+      login_host: "{{ pg_ip }}"
+      login_user: "{{ pg_admin_user }}"
+      login_password: "{{ pg_admin_password }}"
+  retries: 20
+  delay: 1
+  register: pg_ping
+  until: pg_ping.is_available
+
+- name: Create databases
+  community.postgresql.postgresql_db:
+      name: "{{ item.name }}"
+      state: present
+      login_user: "{{ pg_admin_user }}"
+      login_password: "{{ pg_admin_password }}"
+      login_host: "{{ pg_ip }}"
+      maintenance_db: "postgres"
+  with_items:
+      - {"name": "{{ gitea_postgres_db_name }}", "owner": "{{ gitea_postgres_user }}"}
+      - {"name": "{{ passbolt_postgres_db_name }}", "owner": "{{ passbolt_postgres_user }}"}
+
+- name: Create users
+  community.postgresql.postgresql_user:
+      db: "{{ item.db }}"
+      name: "{{ item.name }}"
+      password: "{{ item.password }}"
+      login_user: "{{ pg_admin_user }}"
+      login_password: "{{ pg_admin_password }}"
+      login_host: "{{ pg_ip }}"
+  with_items:
+      - {"db": "{{ gitea_postgres_db_name }}", "name": "{{ gitea_postgres_user }}", 'password': "{{ gitea_postgres_password }}"}
+      - {"db": "{{ passbolt_postgres_db_name }}", "name": "{{ passbolt_postgres_user }}", "password": "{{ passbolt_postgres_password }}"}

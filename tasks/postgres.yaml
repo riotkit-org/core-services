@@ -17,7 +17,7 @@
       state: directory
   with_items:
       - {path: "/var/backup/postgres", owner: "root", group: "root", access: "u+rwx,g,o"}
-      - {path: "/var/lib/riotkit-core/var/lib/postgres", owner: "70", group: "70", access: "u+rwx,g,o"}
+      - {path: "/var/lib/riotkit-core/var/lib/postgresql/data", owner: "70", group: "70", access: "u+rwx,g,o"}
       - {path: "/var/lib/riotkit-core/run/secrets", owner: "70", group: "70", access: "u+rwx,g,o"}
 
 - name: Create a backup if the database is already set up
@@ -52,10 +52,12 @@
       recreate: "{{ recreate }}"
       memory_reservation: "{{ pg_memory_requests }}"
       memory: "{{ pg_memory }}"
+      oom_score_adj: -1000    # protect database from being killed
       log_driver: "journald"
       volume:
-          - /var/lib/riotkit-core/var/lib/postgres:/var/lib/postgresql
           - /var/lib/riotkit-core/run/secrets/postgres-passwd:/run/secrets/postgres-passwd:ro
+      mount:
+          - type=bind,source=/var/lib/riotkit-core/var/lib/postgresql/data,destination=/var/lib/postgresql/data,relabel=shared
       expose:
           - "5432"
       generate_systemd:

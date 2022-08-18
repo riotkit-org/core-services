@@ -15,7 +15,7 @@ gitea_enabled: true
 gitea_ip: "172.131.2.211"
 gitea_image: "gitea/gitea:1.17.0-rootless"
 gitea_postgres_host: "{{ pg_ip }}"  # if PostgreSQL is in other network, then you need to type a DNS name or IP address there
-gitea_postgres_port: "5432"
+gitea_postgres_port: "{{ pg_port }}"
 gitea_postgres_db_name: "gitea"
 gitea_postgres_user: "gitea"
 gitea_postgres_password: "gitea"
@@ -23,7 +23,7 @@ gitea_memory_requests: "100m"
 gitea_memory_limit: "512m"
 gitea_conf_ssh_domain: example.org
 gitea_root_url: "https://example.org"
-gitea_forward_port_to_ip: "127.0.0.1"  # change to eg. VPN ip address
+gitea_forward_port_to_ip: "0.0.0.0"  # INSECURE, change to eg. VPN ip address
 
 # settings
 gitea_conf_app_name: "GIT | A cup of revolution - we have to take the power back to the grassroots"
@@ -51,13 +51,22 @@ pg_memory: "512M"
 pg_admin_user: "anticapitalist"
 pg_admin_password: "read-about-anarchist-syndicalism"
 pg_ip: "172.131.2.210"
-
+pg_port: "5432"
 
 # ---------
 # Passbolt
 # ---------
 passbolt_enabled: true
+passbolt_app_full_url: "https://example.org"
 passbolt_postgres_db_name: "passbolt"
 passbolt_postgres_user: "passbolt"
 passbolt_postgres_password: "alerta-antifascista"
 passbolt_postgres_host: "{{ pg_ip }}"
+passbolt_postgres_port: "{{ pg_port }}"
+passbolt_image: "passbolt/passbolt:3.7.1-1-ce-non-root"
+passbolt_memory_requests: "128M"
+passbolt_memory_limit: "512M"
+passbolt_ip: "172.131.2.212"
+passbolt_forward_port_to_ip: "0.0.0.0"  # INSECURE, change to eg. VPN ip address
+passbolt_email_transport_host: "some-domain.local"
+passbolt_email_transport_port: "587"

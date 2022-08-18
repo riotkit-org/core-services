@@ -11,5 +11,6 @@
   when: gitea_enabled
   tags: gitea
 
-#- include_tasks: passbolt.yaml
-#  when: passbolt_enabled
+- include_tasks: passbolt.yaml
+  when: passbolt_enabled
+  tags: passbolt

@@ -1,0 +1,73 @@
+- name: Make sure directories exists
+  tags: passbolt
+  file:
+      path: "{{ item.path }}"
+      owner: "{{ item.owner }}"
+      group: "{{ item.group }}"
+      mode: "{{ item.access }}"
+      state: directory
+  with_items:
+      - {path: "/var/lib/riotkit-core/etc/passbolt/gpg", owner: "33", group: "33", access: "u+rwx,g,o"}
+      - {path: "/var/lib/riotkit-core/etc/passbolt/jwt", owner: "33", group: "33", access: "u+rwx,g,o"}
+      - {path: "/var/lib/riotkit-core/opt/passbolt-build", owner: "root", group: "root", access: "u+rwx,g,o"}
+
+- name: Create dockerfile
+  tags: passbolt
+  template:
+      src: passbolt/Dockerfile.j2
+      dest: /var/lib/riotkit-core/opt/passbolt-build/Dockerfile
+  register: dockerfile
+
+- name: Clean up old images
+  tags: passbolt
+  shell: "podman rmi --all || true"
+
+- name: Build image
+  tags: passbolt
+  shell: "cd /var/lib/riotkit-core/opt/passbolt-build && podman build . -f ./Dockerfile -t images.localhost/passbolt-image"
+  when: dockerfile.changed
+
+- name: Create Passbolt container
+  tags: passbolt
+  containers.podman.podman_container:
+      name: passbolt
+      image: "images.localhost/passbolt-image"  # image built locally
+      state: started
+      recreate: "{{ recreate }}"
+      network: "{{ network_name }}"
+      memory_reservation: "{{ passbolt_memory_requests }}"
+      memory: "{{ passbolt_memory_limit }}"
+      log_driver: "journald"
+      ip: "{{ passbolt_ip }}"
+      volume:
+          - /var/lib/riotkit-core/etc/passbolt/gpg:/etc/passbolt/gpg
+          - /var/lib/riotkit-core/etc/passbolt/jwt:/etc/passbolt/jwt
+          - /etc/timezone:/etc/timezone:ro
+          - /etc/localtime:/etc/localtime:ro
+      expose:
+          - "8080"
+      ports:
+          - "{{ passbolt_forward_port_to_ip }}:8080:3001/tcp"
+      generate_systemd:
+          path: /etc/systemd/system
+          restart_policy: always
+          time: 120
+          names: true
+          container_prefix: core
+      env:
+         APP_FULL_BASE_URL: "{{ passbolt_app_full_url }}"
+         DATASOURCES_DEFAULT_HOST: "{{ passbolt_postgres_host }}"
+         DATASOURCES_DEFAULT_DRIVER: Cake\Database\Driver\Postgres
+         DATASOURCES_DEFAULT_PORT: "{{ passbolt_postgres_port }}"
+         DATASOURCES_DEFAULT_ENCODING: 'utf8'
+         DATASOURCES_DEFAULT_USERNAME: "{{ passbolt_postgres_user }}"
+         DATASOURCES_DEFAULT_PASSWORD: "{{ passbolt_postgres_password }}"
+         DATASOURCES_DEFAULT_DATABASE: "{{ passbolt_postgres_db_name }}"
+         EMAIL_TRANSPORT_DEFAULT_HOST: "{{ passbolt_email_transport_host }}"
+         EMAIL_TRANSPORT_DEFAULT_PORT: "{{ passbolt_email_transport_port }}"
+
+- name: Enable on system startup
+  tags: passbolt
+  systemd:
+      name: core-passbolt
+      enabled: true

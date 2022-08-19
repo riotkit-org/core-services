@@ -12,6 +12,8 @@ recreate: true # should the containers be recreated on deployment?
 # ------
 ssh_port: 2222
 gitea_enabled: true
+gitea_domain: "git.example.org"
+gitea_root_url: "https://{{ gitea_domain }}"
 gitea_ip: "172.131.2.211"
 gitea_image: "gitea/gitea:1.17.0-rootless"
 gitea_postgres_host: "{{ pg_ip }}"  # if PostgreSQL is in other network, then you need to type a DNS name or IP address there
@@ -22,7 +24,6 @@ gitea_postgres_password: "gitea"
 gitea_memory_requests: "100m"
 gitea_memory_limit: "512m"
 gitea_conf_ssh_domain: example.org
-gitea_root_url: "https://example.org"
 gitea_forward_port_to_ip: "0.0.0.0"  # INSECURE, change to eg. VPN ip address
 
 # settings
@@ -57,7 +58,8 @@ pg_port: "5432"
 # Passbolt
 # ---------
 passbolt_enabled: true
-passbolt_app_full_url: "https://example.org"
+passbolt_domain: "passbolt.example.org"
+passbolt_app_full_url: "https://{{ passbolt_domain }}"
 passbolt_postgres_db_name: "passbolt"
 passbolt_postgres_user: "passbolt"
 passbolt_postgres_password: "alerta-antifascista"
@@ -70,3 +72,14 @@ passbolt_ip: "172.131.2.212"
 passbolt_forward_port_to_ip: "0.0.0.0"  # INSECURE, change to eg. VPN ip address
 passbolt_email_transport_host: "some-domain.local"
 passbolt_email_transport_port: "587"
+
+# -----------------------------------------
+# Gateway - reverse proxy to HTTP services
+# -----------------------------------------
+gateway_enabled: true
+gateway_image: "nginx:1.23"
+gateway_ip: "172.131.2.213"
+gateway_dhparams_size: "2048"
+gateway_memory_requests: "16M"
+gateway_memory_limit: "128M"
+gateway_forward_port_to_ip: "0.0.0.0"

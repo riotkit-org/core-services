@@ -14,3 +14,7 @@
 - include_tasks: passbolt.yaml
   when: passbolt_enabled
   tags: passbolt
+
+- include_tasks: gateway.yaml
+  when: gateway_enabled
+  tags: gateway

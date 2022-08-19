@@ -1,0 +1,22 @@
+server {
+    listen              4443 ssl;
+    server_name         {{ gitea_domain }};
+
+    include /etc/nginx/ssl-params.conf;
+
+    ssl_certificate     /etc/nginx/server.crt;
+    ssl_certificate_key /etc/nginx/server.key;
+
+    location / {
+        proxy_pass http://{{ gitea_ip }}:3000;
+    }
+}
+
+server {
+    listen              8000;
+    server_name         {{ gitea_domain }};
+
+    location / {
+        proxy_pass http://{{ gitea_ip }}:3000;
+    }
+}

@@ -1,0 +1,10 @@
+collections:
+    - name: community.postgresql
+      version: 2.2.0
+
+    - name: containers.podman
+      version: 1.9.4
+
+    - name: community.crypto
+      version: 2.4.0
+

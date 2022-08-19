@@ -1,0 +1,95 @@
+- name: Make sure directories exists
+  tags: gateway
+  file:
+      path: "{{ item.path }}"
+      owner: "{{ item.owner }}"
+      group: "{{ item.group }}"
+      mode: "{{ item.access }}"
+      state: directory
+  with_items:
+      - {path: "/var/lib/riotkit-core/etc/nginx/sites-enabled", owner: "root", group: "root", access: "u+rw,g+r,o+r"}
+
+- name: Render configuration files
+  tags: gateway
+  template:
+      src: "gateway/{{ item.src }}"
+      dest: "{{ item.dest }}"
+  with_items:
+      - {"src": "nginx.conf.j2", "dest": "/var/lib/riotkit-core/etc/nginx/nginx.conf"}
+      - {"src": "ssl-params.conf.j2", "dest": "/var/lib/riotkit-core/etc/nginx/ssl-params.conf"}
+      - {"src": "site-gitea.conf.j2", "dest": "/var/lib/riotkit-core/etc/nginx/sites-enabled/gitea.conf"}
+      - {"src": "site-passbolt.conf.j2", "dest": "/var/lib/riotkit-core/etc/nginx/sites-enabled/passbolt.conf"}
+
+- name: Generate Diffie-Hellman parameters with the default size (4096 bits)
+  tags: gateway
+  community.crypto.openssl_dhparam:
+      path: /var/lib/riotkit-core/etc/nginx/dhparam.pem
+      size: "{{ gateway_dhparams_size }}"
+
+- name: Create private key
+  tags: gateway
+  community.crypto.openssl_privatekey:
+      path: /var/lib/riotkit-core/etc/nginx/server.key
+      type: Ed25519
+
+- name: Create certificate signing request (CSR) for self-signed certificate
+  tags: gateway
+  community.crypto.openssl_csr_pipe:
+    privatekey_path: /var/lib/riotkit-core/etc/nginx/server.key
+    common_name: "{{ gitea_domain }}"
+    organization_name: Riotkit Non-profit
+    subject_alt_name:
+      - "DNS:{{ gitea_domain }}"
+      - "DNS:www.{{ gitea_domain }}"
+      - "DNS:{{ passbolt_domain }}"
+      - "DNS:www.{{ passbolt_domain }}"
+  register: csr
+
+- name: Generate a self signed OpenSSL certificate
+  tags: gateway
+  community.crypto.x509_certificate:
+      path: /var/lib/riotkit-core/etc/nginx/server.crt
+      csr_content: "{{ csr.csr }}"
+      privatekey_path: /var/lib/riotkit-core/etc/nginx/server.key
+      provider: selfsigned
+
+- name: Create Gateway container
+  tags: gateway
+  containers.podman.podman_container:
+      name: gateway
+      image: "{{ gateway_image }}"
+      state: started
+      recreate: "{{ recreate }}"
+      network: "{{ network_name }}"
+      memory_reservation: "{{ gateway_memory_requests }}"
+      memory: "{{ gateway_memory_limit }}"
+      log_driver: "journald"
+      ip: "{{ gateway_ip }}"
+      volume:
+          - /var/lib/riotkit-core/etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+          - /var/lib/riotkit-core/etc/nginx/server.crt:/etc/nginx/server.crt:ro
+          - /var/lib/riotkit-core/etc/nginx/server.key:/etc/nginx/server.key:ro
+          - /var/lib/riotkit-core/etc/nginx/dhparam.pem:/etc/nginx/dhparam.pem:ro
+          - /var/lib/riotkit-core/etc/nginx/sites-enabled/gitea.conf:/etc/nginx/sites-enabled/gitea.conf:ro
+          - /var/lib/riotkit-core/etc/nginx/sites-enabled/passbolt.conf:/etc/nginx/sites-enabled/passbolt.conf:ro
+          - /var/lib/riotkit-core/etc/nginx/ssl-params.conf:/etc/nginx/ssl-params.conf:ro
+          - /etc/timezone:/etc/timezone:ro
+          - /etc/localtime:/etc/localtime:ro
+      expose:
+          - "4443"
+          - "8000"
+      ports:
+          - "{{ gateway_forward_port_to_ip }}:80:8000/tcp"
+          - "{{ gateway_forward_port_to_ip }}:443:4443/tcp"
+      generate_systemd:
+          path: /etc/systemd/system
+          restart_policy: always
+          time: 120
+          names: true
+          container_prefix: core
+
+- name: Enable on system startup
+  tags: gateway
+  systemd:
+      name: core-gateway
+      enabled: true

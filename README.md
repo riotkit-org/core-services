@@ -10,6 +10,8 @@ To setup an infrastructure from code there are needed two independent services:
 - GIT: To checkout the code
 - Password manager: To decrypt secrets required to perform initial deployment
 
+**Podman instead of Docker?** - Its more lightweight than docker (does not require daemon), secondly Kubernetes does not use docker, it's no longer best for production.
+
 Architecture
 ------------
 

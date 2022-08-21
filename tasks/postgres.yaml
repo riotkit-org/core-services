@@ -1,5 +1,6 @@
 - name: Prepare
   pip:
+      executable: pip3
       name: psycopg2-binary
       state: present
 

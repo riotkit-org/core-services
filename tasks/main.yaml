@@ -18,3 +18,7 @@
 - include_tasks: gateway.yaml
   when: gateway_enabled
   tags: gateway
+
+- include_tasks: ufw.yaml
+  when: ufw_enabled
+  tags: ufw

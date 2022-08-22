@@ -47,7 +47,7 @@
       expose:
           - "8080"
       ports:
-          - "{{ passbolt_forward_port_to_ip }}:8080:3001/tcp"
+          - "{{ passbolt_forward_port_to_ip }}:3001:8080/tcp"
       generate_systemd:
           path: /etc/systemd/system
           restart_policy: always

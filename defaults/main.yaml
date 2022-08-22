@@ -83,3 +83,12 @@ gateway_dhparams_size: "2048"
 gateway_memory_requests: "16M"
 gateway_memory_limit: "128M"
 gateway_forward_port_to_ip: "0.0.0.0"
+
+# ----------
+# UFW setup
+# ----------
+ufw_enabled: true
+ufw_allow_forwarded_ports_access_from:
+    - 10.0.0.0/8
+    - 172.0.0.0/8
+    - 127.0.0.0/24

@@ -1,4 +1,12 @@
-- name: Prepare
+- name: Prepare - install requirements from package manager
+  package:
+      name: "{{ item }}"
+      state: present
+  with_items:
+      - libpq-dev
+      - postgresql-client
+
+- name: Prepare - install psycopg2
   pip:
       executable: pip3
       name: psycopg2-binary
@@ -80,7 +88,7 @@
   retries: 20
   delay: 1
   register: pg_ping
-  until: pg_ping.is_available
+  until: pg_ping.is_available is defined and pg_ping.is_available
 
 - name: Create databases
   community.postgresql.postgresql_db:

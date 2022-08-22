@@ -1,0 +1,6 @@
+- name: Iterate over ports
+  tags: ufw
+  loop: '["3001", "3000", "{{ ssh_port }}", "80", "443"]'
+  loop_control:
+      loop_var: port
+  include_tasks: ufw.port.yaml

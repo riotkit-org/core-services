@@ -1,0 +1,19 @@
+- name: Block access from all unknown addresses (port {{ port }})
+  tags: ufw
+  ufw:
+      rule: deny
+      proto: tcp
+      port: '{{ port }}'
+      comment: "Block all unknown traffic to Podman-forwarded ports"
+
+- name: Allow access from allowed subnet/IP (port {{ port }})
+  tags: ufw
+  loop: "{{ ufw_allow_forwarded_ports_access_from }}"
+  loop_control:
+      loop_var: "allowed_subnet"
+  ufw:
+      rule: allow
+      proto: tcp
+      src: "{{ allowed_subnet }}"
+      port: '{{ port }}'
+      comment: "Allow admins to connect via selected subnets to perform disaster recovery"

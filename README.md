@@ -47,6 +47,24 @@ Simple HTTP and HTTPS reverse proxy. Exposes services under given domain/subdoma
 
 **Purpose:** Access Gitea and Passbolt simply by switching IP address in `/etc/hosts` during recovery process
 
+### Security
+
+The gateway is exposed by default for 0.0.0.0 (all interfaces), but is limited for selected subnets using UFW firewall.
+
+```yaml
+ufw_allow_forwarded_ports_access_from:
+    - 10.0.0.0/8
+    - 172.0.0.0/8
+    - 127.0.0.0/24
+```
+
+#### How to access forwarded ports? (80, 443)
+
+When your cluster or something will go down and you need to access the services alternatively, there are recommendations:
+
+- **VPN case:** Assuming you have VPN at `10.180.5.0/24` you can connect via VPN, set `10.180.x.y git.myhost.org` in local `/etc/hosts` for disaster recovery time to access services
+- **Port forward case:** You can port-forward 80 and 443 to your local computer using SSH tunneling, then in local `/etc/hosts` set e.g. `127.0.0.1 git.myhost.org`
+
 PostgreSQL
 ----------
 

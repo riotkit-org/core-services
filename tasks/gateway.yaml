@@ -30,7 +30,7 @@
   tags: gateway
   community.crypto.openssl_privatekey:
       path: /var/lib/riotkit-core/etc/nginx/server.key
-      type: Ed25519
+      type: RSA
 
 - name: Create certificate signing request (CSR) for self-signed certificate
   tags: gateway

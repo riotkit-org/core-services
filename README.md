@@ -65,6 +65,11 @@ When your cluster or something will go down and you need to access the services 
 - **VPN case:** Assuming you have VPN at `10.180.5.0/24` you can connect via VPN, set `10.180.x.y git.myhost.org` in local `/etc/hosts` for disaster recovery time to access services
 - **Port forward case:** You can port-forward 80 and 443 to your local computer using SSH tunneling, then in local `/etc/hosts` set e.g. `127.0.0.1 git.myhost.org`
 
+#### Self-signed certificates, HSTS NOTICE
+
+Assuming that your domain had enabled **HTTP Strict Transport Security**, and you needed to redirect the DNS name to your disaster recovery IP - the self-signed certificate
+will collide with the previously enabled HSTS. **Use incognito mode to access your domain in disaster recovery case.**
+
 PostgreSQL
 ----------
 

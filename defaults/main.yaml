@@ -3,7 +3,7 @@ install_podman: true
 network_name: "coresrv"
 network_subnet: "172.131.2.0/24"
 network_gateway: "172.131.2.1"
-network_ip_range: "172.131.2.128/25"
+network_ip_range: "172.131.2.0/24"
 
 recreate: true # should the containers be recreated on deployment?
 
@@ -28,7 +28,7 @@ gitea_forward_port_to_ip: "0.0.0.0"  # INSECURE, change to eg. VPN ip address
 
 # settings
 gitea_conf_app_name: "GIT | A cup of revolution - we have to take the power back to the grassroots"
-gitea_conf_install_lock: "false"
+gitea_conf_install_lock: "true"
 gitea_conf_disable_registration: "true"
 gitea_conf_register_email_confirm: "true"
 gitea_conf_default_user_visibility: "private"

@@ -75,6 +75,81 @@ PostgreSQL
 
 A dependency to Passbolt and Gitea.
 
+Exposing service using Kubernetes
+---------------------------------
+
+Use `Service`, `Endpoint` and `Ingress` to expose a core service within Kubernetes to the world, or at least to the cluster.
+
+**Benefits of exposing service via Kubernetes:**
+- Automatic TLS certs generation using `certs-manager`
+- IP address access control
+- Web Application Firewall integrated in NGINX controller
+
+```yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+   name: http
+   namespace: git
+spec:
+    ports:
+        - name: http
+          protocol: TCP
+          port: 80
+          # container port or host IP port (depending on IP you are pointing at)
+          targetPort: 3000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+   name: ssh
+   namespace: git
+spec:
+    ports:
+        - name: ssh
+          protocol: TCP
+          port: 2222
+          
+          # container port or host IP port (depending on IP you are pointing at)
+          targetPort: 2222
+    externalTrafficPolicy: Cluster
+    internalTrafficPolicy: Cluster
+    type: LoadBalancer
+    allocateLoadBalancerNodePorts: true
+
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+    name: "http"
+    namespace: "git"
+subsets:
+    - addresses:
+          # use container IP (if reachable on the network from other machine) or IP of a host machine, where container is running and have a port forwarded to (and not blocked on firewall)
+          - ip: "172.131.2.211"  
+      ports:
+          # container port or host IP port (depending on IP you are pointing at)
+          - port: 3000
+            name: "http"
+
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+    name: "ssh"
+    namespace: "git"
+subsets:
+    - addresses:
+          # use container IP (if reachable on the network from other machine) or IP of a host machine, where container is running and have a port forwarded to (and not blocked on firewall)
+          - ip: "172.131.2.211"
+      ports:
+          # container port or host IP port (depending on IP you are pointing at)
+          - port: 2222
+            name: "ssh"
+```
+
 Enjoy!
 ------
 

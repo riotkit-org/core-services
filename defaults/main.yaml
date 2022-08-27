@@ -22,7 +22,7 @@ gitea_postgres_db_name: "gitea"
 gitea_postgres_user: "gitea"
 gitea_postgres_password: "gitea"
 gitea_memory_requests: "100m"
-gitea_memory_limit: "512m"
+gitea_memory_limit: "768m"
 gitea_conf_ssh_domain: example.org
 gitea_forward_port_to_ip: "0.0.0.0"  # INSECURE, change to eg. VPN ip address
 

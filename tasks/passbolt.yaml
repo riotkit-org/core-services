@@ -37,6 +37,7 @@
       network: "{{ network_name }}"
       memory_reservation: "{{ passbolt_memory_requests }}"
       memory: "{{ passbolt_memory_limit }}"
+      restart_policy: on-failure
       log_driver: "journald"
       ip: "{{ passbolt_ip }}"
       volume:

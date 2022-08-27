@@ -61,6 +61,7 @@
       recreate: "{{ recreate }}"
       memory_reservation: "{{ pg_memory_requests }}"
       memory: "{{ pg_memory }}"
+      restart_policy: on-failure
       oom_score_adj: -1000    # protect database from being killed
       log_driver: "journald"
       volume:

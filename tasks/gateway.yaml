@@ -63,6 +63,7 @@
       network: "{{ network_name }}"
       memory_reservation: "{{ gateway_memory_requests }}"
       memory: "{{ gateway_memory_limit }}"
+      restart_policy: on-failure
       log_driver: "journald"
       ip: "{{ gateway_ip }}"
       volume:

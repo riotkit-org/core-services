@@ -51,6 +51,7 @@
       network: "{{ network_name }}"
       memory_reservation: "{{ gitea_memory_requests }}"
       memory: "{{ gitea_memory_limit }}"
+      restart_policy: on-failure
       log_driver: "journald"
       ip: "{{ gitea_ip }}"
       volume:

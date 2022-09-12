@@ -62,7 +62,8 @@
       memory_reservation: "{{ pg_memory_requests }}"
       memory: "{{ pg_memory }}"
       restart_policy: on-failure
-      oom_score_adj: -1000    # protect database from being killed
+      dns: "{{ network_dns }}"
+      oom_score_adj: -1000    # protect database from being killed, stateless processes first
       log_driver: "journald"
       volume:
           - /var/lib/riotkit-core/run/secrets/postgres-passwd:/run/secrets/postgres-passwd:ro

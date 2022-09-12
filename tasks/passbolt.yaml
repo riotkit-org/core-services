@@ -38,6 +38,7 @@
       memory_reservation: "{{ passbolt_memory_requests }}"
       memory: "{{ passbolt_memory_limit }}"
       restart_policy: on-failure
+      dns: "{{ network_dns }}"
       log_driver: "journald"
       ip: "{{ passbolt_ip }}"
       volume:

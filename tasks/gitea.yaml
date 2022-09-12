@@ -52,8 +52,10 @@
       memory_reservation: "{{ gitea_memory_requests }}"
       memory: "{{ gitea_memory_limit }}"
       restart_policy: on-failure
+      dns: "{{ network_dns }}"
       log_driver: "journald"
       ip: "{{ gitea_ip }}"
+      pids_limit: "{{ gitea_pids_limit }}"
       volume:
           - /var/lib/riotkit-core/var/lib/gitea:/var/lib/gitea
           - /var/lib/riotkit-core/etc/gitea:/etc/gitea

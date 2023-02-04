@@ -71,6 +71,8 @@
           - type=bind,source=/var/lib/riotkit-core/var/lib/postgresql/data,destination=/var/lib/postgresql/data,relabel=shared
       expose:
           - "5432"
+      ports:
+          - "{{ postgres_forward_port_to_ip }}:{{ postgres_forward_port_to_port }}:5432/tcp"
       generate_systemd:
           path: /etc/systemd/system
           restart_policy: always

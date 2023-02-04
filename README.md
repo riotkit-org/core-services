@@ -75,6 +75,15 @@ PostgreSQL
 
 A dependency to Passbolt and Gitea.
 
+### Exposing to Kubernetes cluster for performing backups
+
+PostgreSQL instance can be exposed via `5432/tcp` port to a private subnet to let other applications connect to it, or to perform backups.
+
+```yaml
+postgres_forward_port_to_ip: "127.0.0.1"  # use 127.0.0.1 to "disable" port forwarding. Use your private subnet address to expose PostgreSQL into e.g. Kubernetes cluster
+postgres_forward_port_to_port: "5432"
+```
+
 Exposing service using Kubernetes
 ---------------------------------
 

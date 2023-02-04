@@ -58,6 +58,8 @@ pg_admin_user: "anticapitalist"
 pg_admin_password: "read-about-anarchist-syndicalism"
 pg_ip: "172.131.2.210"
 pg_port: "5432"
+postgres_forward_port_to_ip: "127.0.0.1"  # use 127.0.0.1 to "disable" port forwarding. Use your private subnet address to expose PostgreSQL into e.g. Kubernetes cluster
+postgres_forward_port_to_port: "5432"
 
 # ---------
 # Passbolt
